@@ -29,12 +29,17 @@
 #include <linux/slab.h>
 #include <linux/workqueue.h>
 #include <linux/input.h>
+#include <linux/hrtimer.h>
+
+#define WAKE_HOOKS_DEFINED
+
+#ifndef WAKE_HOOKS_DEFINED
 #ifndef CONFIG_HAS_EARLYSUSPEND
 #include <linux/lcd_notify.h>
 #else
 #include <linux/earlysuspend.h>
 #endif
-#include <linux/hrtimer.h>
+#endif
 
 /* uncomment since no touchscreen defines android touch, do that here */
 //#define ANDROID_TOUCH_DECLARED
@@ -96,8 +101,10 @@ static bool touch_x_called = false, touch_y_called = false;
 static bool exec_count = true;
 bool s2w_scr_suspended = false;
 static bool scr_on_touch = false, barrier[2] = {false, false};
+#ifndef WAKE_HOOKS_DEFINED
 #ifndef CONFIG_HAS_EARLYSUSPEND
 static struct notifier_block s2w_lcd_notif;
+#endif
 #endif
 static struct input_dev * sweep2wake_pwrdev;
 static DEFINE_MUTEX(pwrkeyworklock);
@@ -322,6 +329,7 @@ static struct input_handler s2w_input_handler = {
 	.id_table	= s2w_ids,
 };
 
+#ifndef WAKE_HOOKS_DEFINED
 #ifndef CONFIG_HAS_EARLYSUSPEND
 static int lcd_notifier_callback(struct notifier_block *this,
 				unsigned long event, void *data)
@@ -353,6 +361,7 @@ static struct early_suspend s2w_early_suspend_handler = {
 	.suspend = s2w_early_suspend,
 	.resume = s2w_late_resume,
 };
+#endif
 #endif
 
 /*
@@ -462,6 +471,7 @@ static int __init sweep2wake_init(void)
 	if (rc)
 		pr_err("%s: Failed to register s2w_input_handler\n", __func__);
 
+#ifndef WAKE_HOOKS_DEFINED
 #ifndef CONFIG_HAS_EARLYSUSPEND
 	s2w_lcd_notif.notifier_call = lcd_notifier_callback;
 	if (lcd_register_client(&s2w_lcd_notif) != 0) {
@@ -469,6 +479,7 @@ static int __init sweep2wake_init(void)
 	}
 #else
 	register_early_suspend(&s2w_early_suspend_handler);
+#endif
 #endif
 
 #ifndef ANDROID_TOUCH_DECLARED
@@ -503,8 +514,10 @@ static void __exit sweep2wake_exit(void)
 #ifndef ANDROID_TOUCH_DECLARED
 	kobject_del(android_touch_kobj);
 #endif
+#ifndef WAKE_HOOKS_DEFINED
 #ifndef CONFIG_HAS_EARLYSUSPEND
 	lcd_unregister_client(&s2w_lcd_notif);
+#endif
 #endif
 	input_unregister_handler(&s2w_input_handler);
 	destroy_workqueue(s2w_input_wq);
