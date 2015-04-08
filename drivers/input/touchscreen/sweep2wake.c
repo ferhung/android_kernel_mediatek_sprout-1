@@ -93,7 +93,8 @@ MODULE_LICENSE("GPLv2");
 int s2w_switch = S2W_DEFAULT, s2w_s2sonly = S2W_S2SONLY_DEFAULT;
 static int touch_x = 0, touch_y = 0;
 static bool touch_x_called = false, touch_y_called = false;
-static bool scr_suspended = false, exec_count = true;
+static bool exec_count = true;
+bool s2w_scr_suspended = false;
 static bool scr_on_touch = false, barrier[2] = {false, false};
 #ifndef CONFIG_HAS_EARLYSUSPEND
 static struct notifier_block s2w_lcd_notif;
@@ -158,7 +159,7 @@ static void detect_sweep2wake(int x, int y, bool st)
                 x, y, (single_touch) ? "true" : "false");
 #endif
 	//left->right
-	if ((single_touch) && (scr_suspended == true) && (s2w_switch > 0 && !s2w_s2sonly)) {
+	if ((single_touch) && (s2w_scr_suspended == true) && (s2w_switch > 0 && !s2w_s2sonly)) {
 		prevx = 0;
 		nextx = S2W_X_B1;
 		if ((barrier[0] == true) ||
@@ -187,7 +188,7 @@ static void detect_sweep2wake(int x, int y, bool st)
 			}
 		}
 	//right->left
-	} else if ((single_touch) && (scr_suspended == false) && (s2w_switch > 0)) {
+	} else if ((single_touch) && (s2w_scr_suspended == false) && (s2w_switch > 0)) {
 		scr_on_touch=true;
 		prevx = (S2W_X_MAX - S2W_X_FINAL);
 		nextx = S2W_X_B2;
@@ -327,10 +328,10 @@ static int lcd_notifier_callback(struct notifier_block *this,
 {
 	switch (event) {
 	case LCD_EVENT_ON_END:
-		scr_suspended = false;
+		s2w_scr_suspended = false;
 		break;
 	case LCD_EVENT_OFF_END:
-		scr_suspended = true;
+		s2w_scr_suspended = true;
 		break;
 	default:
 		break;
@@ -340,11 +341,11 @@ static int lcd_notifier_callback(struct notifier_block *this,
 }
 #else
 static void s2w_early_suspend(struct early_suspend *h) {
-	scr_suspended = true;
+	s2w_scr_suspended = true;
 }
 
 static void s2w_late_resume(struct early_suspend *h) {
-	scr_suspended = false;
+	s2w_scr_suspended = false;
 }
 
 static struct early_suspend s2w_early_suspend_handler = {
