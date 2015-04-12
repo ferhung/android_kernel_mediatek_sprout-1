@@ -36,6 +36,15 @@
 #include <linux/dma-mapping.h>
 #include <disp_drv_platform.h>
 
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
+#include <linux/input/sweep2wake.h>
+#endif
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+#include <linux/input/doubletap2wake.h>
+#endif
+#endif
+
 #include <linux/hrtimer.h>
 
 #pragma GCC optimize ("O0")
@@ -518,6 +527,15 @@ LCD_STATUS LCD_PowerOn(void)
         s_isLcdPowerOn = TRUE;
     }
 
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
+    s2w_scr_suspended = false;
+#endif
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+    dt2w_scr_suspended = false;
+#endif
+#endif
+
     return LCD_STATUS_OK;
 }
 
@@ -535,6 +553,15 @@ LCD_STATUS LCD_PowerOff(void)
 #endif           
         s_isLcdPowerOn = FALSE;
     }
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
+    s2w_scr_suspended = true;
+#endif
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+    dt2w_scr_suspended = true;
+#endif
+#endif
 
     return LCD_STATUS_OK;
 }
