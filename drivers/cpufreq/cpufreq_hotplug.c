@@ -298,6 +298,8 @@ int hp_get_dynamic_cpu_hotplug_enable(void)
 
 	if (!dbs_data)
 		return 0;
+	if (dbs_data->cdata->governor != GOV_HOTPLUG)
+		return 0;
 	hp_tuners = dbs_data->tuners;
 	if (!hp_tuners)
 		return 0;
@@ -312,6 +314,8 @@ void hp_set_dynamic_cpu_hotplug_enable(int enable)
 	struct hp_dbs_tuners *hp_tuners;
 
 	if (!dbs_data)
+		return;
+	if (dbs_data->cdata->governor != GOV_HOTPLUG)
 		return;
 	hp_tuners = dbs_data->tuners;
 	if (!hp_tuners)
@@ -336,6 +340,8 @@ void hp_limited_cpu_num(int num)
 	struct hp_dbs_tuners *hp_tuners;
 
 	if (!dbs_data)
+		return;
+	if (dbs_data->cdata->governor != GOV_HOTPLUG)
 		return;
 	hp_tuners = dbs_data->tuners;
 	if (!hp_tuners)
@@ -392,6 +398,8 @@ int hp_get_cpu_rush_boost_enable(void)
 
 	if (!dbs_data)
 		return 0;
+	if (dbs_data->cdata->governor != GOV_HOTPLUG)
+		return 0;
 	hp_tuners = dbs_data->tuners;
 	if (!hp_tuners)
 		return 0;
@@ -406,6 +414,8 @@ void hp_set_cpu_rush_boost_enable(int enable)
 	struct hp_dbs_tuners *hp_tuners;
 
 	if (!dbs_data)
+		return;
+	if (dbs_data->cdata->governor != GOV_HOTPLUG)
 		return;
 	hp_tuners = dbs_data->tuners;
 	if (!hp_tuners)
