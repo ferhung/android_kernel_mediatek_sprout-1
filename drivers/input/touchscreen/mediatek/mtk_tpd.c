@@ -28,6 +28,15 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
+#include <linux/input/sweep2wake.h>
+#endif
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+#include <linux/input/doubletap2wake.h>
+#endif
+#endif
+
 /* for magnify velocity******************************************** */
 #define TOUCH_IOC_MAGIC 'A'
 
@@ -158,6 +167,12 @@ static int tpd_remove(struct platform_device *pdev);
 
 extern void tpd_suspend(struct early_suspend *h);
 extern void tpd_resume(struct early_suspend *h);
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#include <cust_eint.h>
+void (*nyx_suspend) (struct early_suspend *h);
+void (*nyx_resume) (struct early_suspend *h);
+#endif
+
 extern void tpd_button_init(void);
 
 /* int tpd_load_status = 0; //0: failed, 1: sucess */
@@ -284,6 +299,47 @@ static void tpd_create_attributes(struct device *dev, struct tpd_attrs *attrs)
 		device_create_file(dev, attrs->attr[--num]);
 }
 
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+//derpshit
+
+static void eros_suspend(struct early_suspend *h) {
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE)
+	prevent_sleep = (s2w_switch > 0) && (s2w_s2sonly == 0);
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+#endif
+
+	if (prevent_sleep) {
+		mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);
+	} else {
+		nyx_suspend(h);
+	}
+}
+
+static void eros_resume(struct early_suspend *h) {
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE)
+	prevent_sleep = (s2w_switch > 0) && (s2w_s2sonly == 0);
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+#endif
+
+	if (prevent_sleep) {
+		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
+	} else {
+		nyx_resume(h);
+	}
+}
+
+#endif
+
 /* touch panel probe */
 static int tpd_probe(struct platform_device *pdev)
 {
@@ -374,6 +430,15 @@ static int tpd_probe(struct platform_device *pdev)
 	register_early_suspend(&MTK_TS_early_suspend_handler);
 #endif
 #endif
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	//fuckthisshit
+	nyx_suspend = g_tpd_drv->suspend;
+	nyx_resume  = g_tpd_drv->resume;
+	g_tpd_drv->suspend = eros_suspend;
+	g_tpd_drv->resume  = eros_resume;
+#endif
+
 /* #ifdef TPD_TYPE_CAPACITIVE */
 	/* TPD_TYPE_CAPACITIVE handle */
 	if (touch_type == 1) {
@@ -455,7 +520,7 @@ static int __init tpd_device_init(void)
 		return -1;
 	}
 #endif
-	
+
 	if (platform_driver_register(&tpd_driver) != 0) {
 		TPD_DMESG("unable to register touch panel driver.\n");
 		return -1;
