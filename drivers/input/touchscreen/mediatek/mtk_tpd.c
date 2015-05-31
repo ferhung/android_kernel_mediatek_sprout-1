@@ -435,6 +435,13 @@ static int tpd_probe(struct platform_device *pdev)
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	MTK_TS_early_suspend_handler.suspend = g_tpd_drv->suspend;
 	MTK_TS_early_suspend_handler.resume = g_tpd_drv->resume;
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	//fuckthisshit
+	nyx_suspend = g_tpd_drv->suspend;
+	nyx_resume  = g_tpd_drv->resume;
+	MTK_TS_early_suspend_handler.suspend = eros_suspend;
+	MTK_TS_early_suspend_handler.resume  = eros_resume;
+#endif
 	register_early_suspend(&MTK_TS_early_suspend_handler);
 #endif
 #endif
