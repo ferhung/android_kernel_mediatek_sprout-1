@@ -197,8 +197,8 @@ static void dt2w_input_event(struct input_handle *handle, unsigned int type,
 	pr_info("doubletap2wake: code: %s|%u, val: %i\n",
 		((code==ABS_MT_POSITION_X) ? "X" :
 		(code==ABS_MT_POSITION_Y) ? "Y" :
-		((code==ABS_MT_TRACKING_ID)||(code==330)) ? "ID" :
-		"undef"), code, value);
+		((code==ABS_MT_TRACKING_ID)||
+			(code==330)) ? "ID" : "undef"), code, value);
 #endif
 	if (!dt2w_scr_suspended)
 		return;
@@ -208,6 +208,30 @@ static void dt2w_input_event(struct input_handle *handle, unsigned int type,
 		return;
 	}
 
+	/*
+	 * '330'? Many touch panels are 'broken' in the sense of not following the
+	 * multi-touch protocol given in Documentation/input/multi-touch-protocol.txt.
+	 * According to the docs, touch panels using the type B protocol must send in
+	 * a ABS_MT_TRACKING_ID event after lifting the contact in the first slot.
+	 * This should in the flow of events, help us set the necessary doubletap2wake
+	 * variable and proceed as per the algorithm.
+	 *
+	 * This however is not the case with various touch panel drivers, and hence
+	 * there is no reliable way of tracking ABS_MT_TRACKING_ID on such panels.
+	 * Some of the panels however do track the lifting of contact, but with a
+	 * different event code, and a different event value.
+	 *
+	 * So, add checks for those event codes and values to keep the algo flow.
+	 *
+	 * synaptics_s3203 => code: 330; val: 0
+	 *
+	 * Note however that this is not possible with panels like the CYTTSP3 panel
+	 * where there are no such events being reported for the lifting of contacts
+	 * though i2c data has a ABS_MT_TRACKING_ID or equivalent event variable
+	 * present. In such a case, make sure the touch_cnt variable is publicly
+	 * available for modification.
+	 *
+	 */
 	if ((code == ABS_MT_TRACKING_ID && value == -1) || (code == 330 && value == 0)) {
 		touch_cnt = true;
 		return;
@@ -341,9 +365,13 @@ static ssize_t dt2w_doubletap2wake_show(struct device *dev,
 static ssize_t dt2w_doubletap2wake_dump(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
-	if (buf[0] >= '0' && buf[0] <= '2' && buf[1] == '\n')
-                if (dt2w_switch != buf[0] - '0')
-		        dt2w_switch = buf[0] - '0';
+	if (buf[1] == '\n') {
+		if (buf[0] == '0') {
+			dt2w_switch = 0;
+		} else if (buf[0] == '1') {
+			dt2w_switch = 1;
+		}
+	}
 
 	return count;
 }
@@ -462,4 +490,3 @@ static void __exit doubletap2wake_exit(void)
 
 module_init(doubletap2wake_init);
 module_exit(doubletap2wake_exit);
-
