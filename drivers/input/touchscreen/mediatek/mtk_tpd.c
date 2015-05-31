@@ -300,7 +300,6 @@ static void tpd_create_attributes(struct device *dev, struct tpd_attrs *attrs)
 }
 
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-//derpshit
 
 static void eros_suspend(struct early_suspend *h) {
 #if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
@@ -315,15 +314,11 @@ static void eros_suspend(struct early_suspend *h) {
 	dt2w_scr_suspended = true;
 #endif
 
-	pr_info("%s: twn: +++++++++++++++\n", __func__);
 	if (prevent_sleep) {
 		mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);
-		pr_info("%s: twn: unmasking ts panel\n", __func__);
 	} else {
 		nyx_suspend(h);
-		pr_info("%s: twn: calling orig fn nyx_suspend\n", __func__);
 	}
-	pr_info("%s: twn: ---------------\n", __func__);
 }
 
 static void eros_resume(struct early_suspend *h) {
@@ -339,7 +334,6 @@ static void eros_resume(struct early_suspend *h) {
 	dt2w_scr_suspended = false;
 #endif
 
-	pr_info("%s: twn: +++++++++++++++\n", __func__);
 	if (prevent_sleep) {
 		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
 		// now that we've masked this, call a suspend/resume cycle to clear this up
@@ -347,12 +341,9 @@ static void eros_resume(struct early_suspend *h) {
 		// be able to handle that.
 		nyx_suspend(h);
 		nyx_resume(h);
-		pr_info("%s: twn: masking ts panel\n", __func__);
 	} else {
 		nyx_resume(h);
-		pr_info("%s: twn: calling orig fn nyx_resume\n", __func__);
 	}
-	pr_info("%s: twn: ---------------\n", __func__);
 }
 
 #endif
@@ -445,7 +436,6 @@ static int tpd_probe(struct platform_device *pdev)
 	MTK_TS_early_suspend_handler.suspend = g_tpd_drv->suspend;
 	MTK_TS_early_suspend_handler.resume = g_tpd_drv->resume;
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-	//fuckthisshit
 	nyx_suspend = g_tpd_drv->suspend;
 	nyx_resume  = g_tpd_drv->resume;
 	MTK_TS_early_suspend_handler.suspend = eros_suspend;
@@ -456,7 +446,6 @@ static int tpd_probe(struct platform_device *pdev)
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-	//fuckthisshit
 	nyx_suspend = g_tpd_drv->suspend;
 	nyx_resume  = g_tpd_drv->resume;
 	g_tpd_drv->suspend = eros_suspend;
