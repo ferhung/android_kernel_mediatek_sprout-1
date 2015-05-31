@@ -2,6 +2,7 @@
  * include/linux/input/sweep2wake.h
  *
  * Copyright (c) 2013, Dennis Rassmann <showp1984@gmail.com>
+ * Copyright (c) 2015, Vineeth Raj <contact.twn@openmailbox.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
