@@ -336,9 +336,19 @@ static void eros_resume(struct early_suspend *h) {
 
 	if (prevent_sleep) {
 		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
-		// now that we've masked this, call a suspend/resume cycle to clear this up
-		// time constraints? maybe we should just call _resume alone because ts driver shoule
-		// be able to handle that.
+		/*
+		 * now that we've masked back CUST_EINT_TOUCH_PANEL_NUM, a touch panel reset
+		 * needs to be called. However, since sprout has 5 different panels, just
+		 * call a suspend/resume cycle to allow a normal ctp reset.
+		 * Time constraints shouldn't be much given just the GPIO's are cleared,
+		 * however, maybe we should just call _resume alone since the ctp driver
+		 * should be able to handle cases where the panel is already in _resume
+		 * but waiting for an IRQ flush (?) or a GPIO reset(?).
+		 *
+		 * This is similar to ft5x06_ts's panel behaviour during _HIBERNATE mode
+		 * where the ctp doesn't respond to anything but hard reset calls.
+		 *
+		 */
 		nyx_suspend(h);
 		nyx_resume(h);
 	} else {
