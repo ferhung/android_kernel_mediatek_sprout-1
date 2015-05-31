@@ -139,14 +139,14 @@ __setup("s2w=", read_s2w_cmdline);
 /* PowerKey work func */
 static void sweep2wake_presspwr(struct work_struct * sweep2wake_presspwr_work) {
 	if (!mutex_trylock(&pwrkeyworklock))
-                return;
+		return;
 	input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
 	input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
 	msleep(S2W_PWRKEY_DUR);
 	input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 0);
 	input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
 	msleep(S2W_PWRKEY_DUR);
-        mutex_unlock(&pwrkeyworklock);
+	mutex_unlock(&pwrkeyworklock);
 	return;
 }
 static DECLARE_WORK(sweep2wake_presspwr_work, sweep2wake_presspwr);
@@ -154,7 +154,7 @@ static DECLARE_WORK(sweep2wake_presspwr_work, sweep2wake_presspwr);
 /* PowerKey trigger */
 static void sweep2wake_pwrtrigger(void) {
 	schedule_work(&sweep2wake_presspwr_work);
-        return;
+	return;
 }
 
 /* reset on finger release */
@@ -168,12 +168,11 @@ static void sweep2wake_reset(void) {
 /* Sweep2wake main function */
 static void detect_sweep2wake(int x, int y, bool st)
 {
-        int prevx = 0, nextx = 0;
-        bool single_touch = st;
+	int prevx = 0, nextx = 0;
+	bool single_touch = st;
 #if S2W_DEBUG
-        pr_info(LOGTAG"x,y(%4d,%4d) single:%s\n",
-                x, y, (single_touch) ? "true" : "false");
-        pr_info(LOGTAG"s2w_scr_suspended: %s\n", s2w_scr_suspended ? "true" : "false");
+	pr_info(LOGTAG"x,y(%4d,%4d) single:%s\n",
+		x, y, (single_touch) ? "true" : "false");
 #endif
 	//left->right
 	if ((single_touch) && (s2w_scr_suspended == true) && (s2w_switch > 0 && !s2w_s2sonly)) {
@@ -250,15 +249,40 @@ static void s2w_input_event(struct input_handle *handle, unsigned int type,
 	pr_info("sweep2wake: code: %s|%u, val: %i\n",
 		((code==ABS_MT_POSITION_X) ? "X" :
 		(code==ABS_MT_POSITION_Y) ? "Y" :
-		((code==ABS_MT_TRACKING_ID)||(code==330)) ? "ID" :
-		"undef"), code, value);
+		((code==ABS_MT_TRACKING_ID)||
+			(code==330)) ? "ID" : "undef"), code, value);
 #endif
 	if (code == ABS_MT_SLOT) {
 		sweep2wake_reset();
 		return;
 	}
 
-	if ((code == ABS_MT_TRACKING_ID && value == -1) || (code == 330 && value == 0)) {
+	/*
+	 * '330'? Many touch panels are 'broken' in the sense of not following the
+	 * multi-touch protocol given in Documentation/input/multi-touch-protocol.txt.
+	 * According to the docs, touch panels using the type B protocol must send in
+	 * a ABS_MT_TRACKING_ID event after lifting the contact in the first slot.
+	 * This should in the flow of events, help us reset the sweep2wake variables
+	 * and proceed as per the algorithm.
+	 *
+	 * This however is not the case with various touch panel drivers, and hence
+	 * there is no reliable way of tracking ABS_MT_TRACKING_ID on such panels.
+	 * Some of the panels however do track the lifting of contact, but with a
+	 * different event code, and a different event value.
+	 *
+	 * So, add checks for those event codes and values to keep the algo flow.
+	 *
+	 * synaptics_s3203 => code: 330; val: 0
+	 *
+	 * Note however that this is not possible with panels like the CYTTSP3 panel
+	 * where there are no such events being reported for the lifting of contacts
+	 * though i2c data has a ABS_MT_TRACKING_ID or equivalent event variable
+	 * present. In such a case, make sure the sweep2wake_reset() function is
+	 * publicly available for external calls.
+	 *
+	 */
+	if ((code == ABS_MT_TRACKING_ID && value == -1) ||
+		(code == 330 && value == 0)) {
 		sweep2wake_reset();
 		return;
 	}
@@ -391,9 +415,13 @@ static ssize_t s2w_sweep2wake_show(struct device *dev,
 static ssize_t s2w_sweep2wake_dump(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
-	if (buf[0] >= '0' && buf[0] <= '1' && buf[1] == '\n')
-                if (s2w_switch != buf[0] - '0')
-		        s2w_switch = buf[0] - '0';
+	if (buf[1] == '\n') {
+		if (buf[0] == '0') {
+			s2w_switch = 0;
+		} else if (buf[0] == '1') {
+			s2w_switch = 1;
+		}
+	}
 
 	return count;
 }
@@ -414,9 +442,13 @@ static ssize_t s2w_s2w_s2sonly_show(struct device *dev,
 static ssize_t s2w_s2w_s2sonly_dump(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count)
 {
-	if (buf[0] >= '0' && buf[0] <= '1' && buf[1] == '\n')
-                if (s2w_s2sonly != buf[0] - '0')
-		        s2w_s2sonly = buf[0] - '0';
+	if (buf[1] == '\n') {
+		if (buf[0] == '0') {
+			s2w_s2sonly = 0;
+		} else if (buf[0] == '1') {
+			s2w_s2sonly = 1;
+		}
+	}
 
 	return count;
 }
