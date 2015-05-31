@@ -305,6 +305,13 @@ static void eros_suspend(struct early_suspend *h) {
 #if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
 	bool prevent_sleep = false;
 #endif
+	/*
+	 * we're taking a gamble here and assuming that the suspend/resume calls will
+	 * be correctly made by the kernel everytime screen suspend/resume is made.
+	 *
+	 * If it doesn't, well, that breaks things.
+	 *
+	 */
 #if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE)
 	prevent_sleep = (s2w_switch > 0) && (s2w_s2sonly == 0);
 	s2w_scr_suspended = true;
