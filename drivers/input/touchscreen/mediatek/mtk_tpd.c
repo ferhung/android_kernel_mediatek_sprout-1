@@ -446,20 +446,24 @@ static int tpd_probe(struct platform_device *pdev)
 	MTK_TS_early_suspend_handler.suspend = g_tpd_drv->suspend;
 	MTK_TS_early_suspend_handler.resume = g_tpd_drv->resume;
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-	nyx_suspend = g_tpd_drv->suspend;
-	nyx_resume  = g_tpd_drv->resume;
-	MTK_TS_early_suspend_handler.suspend = eros_suspend;
-	MTK_TS_early_suspend_handler.resume  = eros_resume;
+	if ((g_tpd_drv->suspend != NULL) && (g_tpd_drv->resume != NULL)) {
+		nyx_suspend = g_tpd_drv->suspend;
+		nyx_resume  = g_tpd_drv->resume;
+		MTK_TS_early_suspend_handler.suspend = eros_suspend;
+		MTK_TS_early_suspend_handler.resume  = eros_resume;
+	}
 #endif
 	register_early_suspend(&MTK_TS_early_suspend_handler);
 #endif
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
-	nyx_suspend = g_tpd_drv->suspend;
-	nyx_resume  = g_tpd_drv->resume;
-	g_tpd_drv->suspend = eros_suspend;
-	g_tpd_drv->resume  = eros_resume;
+	if ((g_tpd_drv->suspend != NULL) && (g_tpd_drv->resume != NULL)) {
+		nyx_suspend = g_tpd_drv->suspend;
+		nyx_resume  = g_tpd_drv->resume;
+		g_tpd_drv->suspend = eros_suspend;
+		g_tpd_drv->resume  = eros_resume;
+	}
 #endif
 
 /* #ifdef TPD_TYPE_CAPACITIVE */
