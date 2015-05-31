@@ -886,6 +886,9 @@ static void tpd_suspend(struct early_suspend *h)
 #endif
 
 #ifdef CONFIG_TOUCHSCREEN_POWER_DOWN_WHEN_SLEEP
+
+#pragma gcc message "fuckthisshit"
+
     mt_set_gpio_mode(GPIO_CTP_RST_PIN, GPIO_CTP_RST_PIN_M_GPIO);
     mt_set_gpio_dir(GPIO_CTP_RST_PIN, GPIO_DIR_OUT);
     mt_set_gpio_out(GPIO_CTP_RST_PIN, GPIO_OUT_ZERO);

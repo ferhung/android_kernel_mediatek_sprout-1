@@ -342,6 +342,11 @@ static void eros_resume(struct early_suspend *h) {
 	pr_info("%s: twn: +++++++++++++++\n", __func__);
 	if (prevent_sleep) {
 		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
+		// now that we've masked this, call a suspend/resume cycle to clear this up
+		// time constraints? maybe we should just call _resume alone because ts driver shoule
+		// be able to handle that.
+		nyx_suspend(h);
+		nyx_resume(h);
 		pr_info("%s: twn: masking ts panel\n", __func__);
 	} else {
 		nyx_resume(h);
