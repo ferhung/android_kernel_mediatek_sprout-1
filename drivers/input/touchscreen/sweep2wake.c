@@ -172,6 +172,7 @@ static void detect_sweep2wake(int x, int y, bool st)
 #if S2W_DEBUG
         pr_info(LOGTAG"x,y(%4d,%4d) single:%s\n",
                 x, y, (single_touch) ? "true" : "false");
+        pr_info(LOGTAG"s2w_scr_suspended: %s\n", s2w_scr_suspended ? "true" : "false");
 #endif
 	//left->right
 	if ((single_touch) && (s2w_scr_suspended == true) && (s2w_switch > 0 && !s2w_s2sonly)) {
