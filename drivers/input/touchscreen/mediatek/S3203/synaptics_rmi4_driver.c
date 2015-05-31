@@ -2001,6 +2001,7 @@ extern atomic_t Firmware_Update_Flag;
 
 static void tpd_resume(struct early_suspend *h)
 {
+    printk("%s: twn: ++++\n", __func__);
     TPD_DEBUG("TPD wake up\n");
 
     if(atomic_read(&suspend_flag))
@@ -2011,11 +2012,13 @@ static void tpd_resume(struct early_suspend *h)
         mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);
         atomic_set(&suspend_flag,0);
     }
+    printk("%s: twn: ----\n", __func__);
     return;
 }
 
 static void tpd_suspend(struct early_suspend *h)
 {
+    printk("%s: twn: ++++\n", __func__);
     TPD_DEBUG("TPD enter sleep\n");
     if(atomic_read(&Firmware_Update_Flag))
     {
@@ -2032,6 +2035,7 @@ static void tpd_suspend(struct early_suspend *h)
 
     atomic_set(&suspend_flag,1);
     mutex_unlock(&tp_mutex);
+    printk("%s: twn: ----\n", __func__);
      return;
  }
 

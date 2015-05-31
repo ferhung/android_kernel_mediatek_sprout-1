@@ -122,7 +122,7 @@ static struct task_struct *thread = NULL;
 static DECLARE_WAIT_QUEUE_HEAD(waiter);
 static int tpd_halt = 0;
 static int tpd_flag = 0;
-#ifdef TPD_HAVE_BUTTON 
+#ifdef TPD_HAVE_BUTTON
 static int tpd_keys_local[TPD_KEY_COUNT] = TPD_KEYS;
 static int tpd_keys_dim_local[TPD_KEY_COUNT][3] = TPD_KEYS_DIM;
 #endif
@@ -929,9 +929,9 @@ printk("[s3508_11]finger = %d\n",finger);
 
         if(touch_ssb_data.use_tpd_button == 1){
 			if (NORMAL_BOOT != boot_mode)
-			{   
-				tpd_button(x, y, 1);  
-			}	
+			{
+				tpd_button(x, y, 1);
+			}
         }
 
 printk("[s3508_11]x = %d  y = %d\n", x, y);
@@ -961,9 +961,9 @@ printk("[s3508_11]");
 
     if(touch_ssb_data.use_tpd_button == 1){
 		if (NORMAL_BOOT != boot_mode)
-		{   
-			tpd_button(x, y, 0); 
-		}   
+		{
+			tpd_button(x, y, 0);
+		}
 		printk("[s3508_11_button]x = %d  y = %d\n", x, y);
         }
 	}
@@ -2695,7 +2695,7 @@ EXPORT_SYMBOL(synaptics_rmi4_new_function);
 static int __devinit synaptics_rmi4_probe(struct i2c_client *client,
 		const struct i2c_device_id *dev_id)
 {
-unsigned char  tp_info[512];//++++rgk add tp info by wuhao	2014/3/11	
+unsigned char  tp_info[512];//++++rgk add tp info by wuhao	2014/3/11
 int len;//++++rgk add tp info by wuhao	2014/3/11
 printk("[s3508]synaptics_rmi4_probe\n");
 	int retval;
@@ -2703,7 +2703,7 @@ printk("[s3508]synaptics_rmi4_probe\n");
 	struct synaptics_rmi4_data *rmi4_data;
 	 char databuf[10]= {0};
 	printk("\n@@@@@addr:0x%x\n",client->addr);
-	if (tpd_load_status)		
+	if (tpd_load_status)
 		return -1;
 
 	if (!i2c_check_functionality(client->adapter,
@@ -2731,7 +2731,7 @@ printk("[s3508]synaptics_rmi4_probe\n");
 	hwPowerOn(MT65XX_POWER_LDO_VGP1, VOL_2800, "TP");
     hwPowerOn(MT6323_POWER_LDO_VGP1, VOL_2800, "TP");
 	hwPowerOn(MT65XX_POWER_LDO_VGP2, VOL_2800, "TP");
-	
+
 	msleep(DELAY_S7300_BOOT_READY);
   	mt_set_gpio_out(GPIO_CTP_RST_PIN, GPIO_OUT_ZERO);
 	msleep(DELAY_S7300_RESET);
@@ -3004,6 +3004,8 @@ static void synaptics_rmi4_early_suspend(struct early_suspend *h)
 			container_of(h, struct synaptics_rmi4_data,
 			early_suspend);
 
+	printk("%s: twn: ++++\n", __func__);
+
 	if (rmi4_data->stay_awake) {
 		rmi4_data->staying_awake = true;
 		return;
@@ -3027,6 +3029,8 @@ static void synaptics_rmi4_early_suspend(struct early_suspend *h)
 	if (rmi4_data->full_pm_cycle)
 		synaptics_rmi4_suspend(&(rmi4_data->input_dev->dev));
 
+	printk("%s: twn: ----\n", __func__);
+
 	return;
 }
 
@@ -3046,6 +3050,8 @@ static void synaptics_rmi4_late_resume(struct early_suspend *h)
 	struct synaptics_rmi4_data *rmi4_data =
 			container_of(h, struct synaptics_rmi4_data,
 			early_suspend);
+
+	printk("%s: twn: ++++\n", __func__);
 
 	if (rmi4_data->staying_awake)
 		return;
@@ -3073,6 +3079,8 @@ static void synaptics_rmi4_late_resume(struct early_suspend *h)
 	mutex_unlock(&exp_data.mutex);
 
 	rmi4_data->touch_stopped = false;
+
+	printk("%s: twn: ----\n", __func__);
 
 	return;
 }
@@ -3198,7 +3206,7 @@ static int tpd_local_init(void)
 	boot_mode = get_boot_mode();
 	if (boot_mode == 3) {
 		boot_mode = NORMAL_BOOT;
-	}  
+	}
 	return 0;
 }
 
@@ -3211,7 +3219,7 @@ static struct tpd_driver_t synaptics_rmi4_driver = {
 	.tpd_have_button = 1,
 #else
 	.tpd_have_button = 0,
-#endif		
+#endif
 };
 
 static struct i2c_board_info __initdata i2c_tpd={ I2C_BOARD_INFO("synaptics-tpd", (TPD_I2C_ADDR))};
