@@ -313,15 +313,15 @@ static void eros_suspend(struct early_suspend *h) {
 	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
 #endif
 
-	pr_info("%s: twn: +++++++++++++++\n");
+	pr_info("%s: twn: +++++++++++++++\n", __func__);
 	if (prevent_sleep) {
 		mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);
-		pr_info("%s: twn: unmasking ts panel\n");
+		pr_info("%s: twn: unmasking ts panel\n", __func__);
 	} else {
 		nyx_suspend(h);
-		pr_info("%s: twn: calling orig fn nyx_suspend\n");
+		pr_info("%s: twn: calling orig fn nyx_suspend\n", __func__);
 	}
-	pr_info("%s: twn: ---------------\n");
+	pr_info("%s: twn: ---------------\n", __func__);
 }
 
 static void eros_resume(struct early_suspend *h) {
@@ -335,15 +335,15 @@ static void eros_resume(struct early_suspend *h) {
 	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
 #endif
 
-	pr_info("%s: twn: +++++++++++++++\n");
+	pr_info("%s: twn: +++++++++++++++\n", __func__);
 	if (prevent_sleep) {
 		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
-		pr_info("%s: twn: masking ts panel\n");
+		pr_info("%s: twn: masking ts panel\n", __func__);
 	} else {
 		nyx_resume(h);
-		pr_info("%s: twn: calling orig fn nyx_resume\n");
+		pr_info("%s: twn: calling orig fn nyx_resume\n", __func__);
 	}
-	pr_info("%s: twn: ---------------\n");
+	pr_info("%s: twn: ---------------\n", __func__);
 }
 
 #endif
