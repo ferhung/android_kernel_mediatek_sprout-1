@@ -248,7 +248,7 @@ static void s2w_input_event(struct input_handle *handle, unsigned int type,
 	pr_info("sweep2wake: code: %s|%u, val: %i\n",
 		((code==ABS_MT_POSITION_X) ? "X" :
 		(code==ABS_MT_POSITION_Y) ? "Y" :
-		(code==ABS_MT_TRACKING_ID) ? "ID" :
+		((code==ABS_MT_TRACKING_ID)||(code==330)) ? "ID" :
 		"undef"), code, value);
 #endif
 	if (code == ABS_MT_SLOT) {
@@ -256,7 +256,7 @@ static void s2w_input_event(struct input_handle *handle, unsigned int type,
 		return;
 	}
 
-	if (code == ABS_MT_TRACKING_ID && value == -1) {
+	if ((code == ABS_MT_TRACKING_ID && value == -1) || (code == 330 && value == 0)) {
 		sweep2wake_reset();
 		return;
 	}
