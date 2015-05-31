@@ -544,7 +544,7 @@ static int __init tpd_device_init(void)
 		return -1;
 	}
 #endif
-
+	
 	if (platform_driver_register(&tpd_driver) != 0) {
 		TPD_DMESG("unable to register touch panel driver.\n");
 		return -1;
