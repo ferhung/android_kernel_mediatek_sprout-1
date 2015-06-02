@@ -466,10 +466,17 @@ static int tpd_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
 	if ((g_tpd_drv->suspend != NULL) && (g_tpd_drv->resume != NULL)) {
-		nyx_suspend = g_tpd_drv->suspend;
-		nyx_resume  = g_tpd_drv->resume;
-		g_tpd_drv->suspend = eros_suspend;
-		g_tpd_drv->resume  = eros_resume;
+		if ((nyx_suspend == NULL) && (nyx_resume == NULL)) {
+			/*
+			 * in case nyx_suspend || nyx_resume != NULL
+			 * they have _suspend|_resume functions in them
+			 * leave them the fuck alone.
+			 */
+			nyx_suspend = g_tpd_drv->suspend;
+			nyx_resume  = g_tpd_drv->resume;
+			g_tpd_drv->suspend = eros_suspend;
+			g_tpd_drv->resume  = eros_resume;
+		}
 	}
 #endif
 
