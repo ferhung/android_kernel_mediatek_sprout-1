@@ -488,22 +488,6 @@ static int __init sweep2wake_init(void)
 {
 	int rc = 0;
 
-	sweep2wake_pwrdev = input_allocate_device();
-	if (!sweep2wake_pwrdev) {
-		pr_err("Can't allocate suspend autotest power button\n");
-		goto err_alloc_dev;
-	}
-
-	input_set_capability(sweep2wake_pwrdev, EV_KEY, KEY_POWER);
-	sweep2wake_pwrdev->name = "s2w_pwrkey";
-	sweep2wake_pwrdev->phys = "s2w_pwrkey/input0";
-
-	rc = input_register_device(sweep2wake_pwrdev);
-	if (rc) {
-		pr_err("%s: input_register_device err=%d\n", __func__, rc);
-		goto err_input_dev;
-	}
-
 	s2w_input_wq = create_workqueue("s2wiwq");
 	if (!s2w_input_wq) {
 		pr_err("%s: Failed to create s2wiwq workqueue\n", __func__);
@@ -544,8 +528,6 @@ static int __init sweep2wake_init(void)
 		pr_warn("%s: sysfs_create_file failed for sweep2wake_version\n", __func__);
 	}
 
-err_input_dev:
-	input_free_device(sweep2wake_pwrdev);
 err_alloc_dev:
 	pr_info(LOGTAG"%s done\n", __func__);
 
@@ -564,8 +546,6 @@ static void __exit sweep2wake_exit(void)
 #endif
 	input_unregister_handler(&s2w_input_handler);
 	destroy_workqueue(s2w_input_wq);
-	input_unregister_device(sweep2wake_pwrdev);
-	input_free_device(sweep2wake_pwrdev);
 	return;
 }
 
