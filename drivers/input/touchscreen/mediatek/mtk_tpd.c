@@ -469,8 +469,8 @@ static int tpd_probe(struct platform_device *pdev)
 		if ((nyx_suspend == NULL) && (nyx_resume == NULL)) {
 			/*
 			 * in case nyx_suspend || nyx_resume != NULL
-			 * they have _suspend|_resume functions in them
-			 * leave them the fuck alone.
+			 * they have _suspend|_resume functions in them;
+			 * in which case leave them alone.
 			 */
 			nyx_suspend = g_tpd_drv->suspend;
 			nyx_resume  = g_tpd_drv->resume;
