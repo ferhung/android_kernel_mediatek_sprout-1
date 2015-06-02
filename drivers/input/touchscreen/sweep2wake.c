@@ -120,6 +120,12 @@ static DEFINE_MUTEX(pwrkeyworklock);
 static struct workqueue_struct *s2w_input_wq;
 static struct work_struct s2w_input_work;
 
+/* PowerKey setter */
+void sweep2wake_setdev(struct input_dev * input_device) {
+	sweep2wake_pwrdev = input_device;
+	printk(LOGTAG"set sweep2wake_pwrdev: %s\n", sweep2wake_pwrdev->name);
+}
+
 /* Read cmdline for s2w */
 static int __init read_s2w_cmdline(char *s2w)
 {
@@ -527,9 +533,6 @@ static int __init sweep2wake_init(void)
 	if (rc) {
 		pr_warn("%s: sysfs_create_file failed for sweep2wake_version\n", __func__);
 	}
-
-err_alloc_dev:
-	pr_info(LOGTAG"%s done\n", __func__);
 
 	return 0;
 }
