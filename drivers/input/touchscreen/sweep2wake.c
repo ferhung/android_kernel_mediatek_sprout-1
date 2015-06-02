@@ -26,11 +26,11 @@
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/err.h>
-#include <linux/input/sweep2wake.h>
 #include <linux/slab.h>
 #include <linux/workqueue.h>
 #include <linux/input.h>
 #include <linux/hrtimer.h>
+#include <linux/input/sweep2wake.h>
 
 #define WAKE_HOOKS_DEFINED
 

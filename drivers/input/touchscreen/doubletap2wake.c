@@ -26,12 +26,12 @@
 #include <linux/delay.h>
 #include <linux/init.h>
 #include <linux/err.h>
-#include <linux/input/doubletap2wake.h>
 #include <linux/slab.h>
 #include <linux/workqueue.h>
 #include <linux/input.h>
 #include <linux/hrtimer.h>
 #include <asm-generic/cputime.h>
+#include <linux/input/doubletap2wake.h>
 
 /* uncomment since no touchscreen defines android touch, do that here */
 //#define ANDROID_TOUCH_DECLARED
